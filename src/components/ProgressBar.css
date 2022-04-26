@@ -1,0 +1,10 @@
+.progress-div {
+    background-color: rgb(233, 233, 233);
+    border-radius: .5rem;
+}
+
+.progress {
+    background-color: rgb(62, 122, 235);
+    height: 100%;
+    border-radius: 1rem;
+}

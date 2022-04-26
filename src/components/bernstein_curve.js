@@ -135,6 +135,7 @@ class Bezier extends PureComponent {
     const D = this.lerp(A, B, t);
     const E = this.lerp(B, C, t);
     const P = this.lerp(D, E, t);
+    console.log([A, B, C, D, E, P]);
 
     return (
       <Svg

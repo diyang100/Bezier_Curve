@@ -94,3 +94,8 @@ export const Z_INDICES = {
     mainContent: 10,
     header: 100,
 };
+
+export let p1weight = (t) => { return ( -(t**3) + (3*(t**2)) - (3*t)+1 ); }
+export let p2weight = (t) => { return ( (3*(t**3)) - (6*(t**2)) + (3*t) )}
+export let p3weight = (t) => { return ( (-3*(t**3)) + (3*(t**2)) )}
+export let p4weight = (t) => { return (t**3) }
