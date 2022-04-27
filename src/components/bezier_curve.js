@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { COLORS, BREAKPOINT_SIZES, IS_MOBILE_USER_AGENT } from '../constants/constants';
+import { lerp } from '../constants/constants';
 
 const getBreakpointFor = windowWidth =>
   Object.keys(BREAKPOINT_SIZES).find(
@@ -94,10 +95,6 @@ class Bezier extends PureComponent {
     updatePoint(draggingPointId, positionWithinViewBox);
   };
 
-  lerp = (p1, p2, t) => {
-      return [(1-t)*p1[0] + t*p2[0], (1-t)*p1[1] + t*p2[1]];
-  }
-
   render() {
     const {
       points,
@@ -129,12 +126,12 @@ class Bezier extends PureComponent {
     const isMobile = getDeviceType() === 'mobile';
 
     
-    const A = this.lerp(p1, p2, t);
-    const B = this.lerp(p2, p3, t);
-    const C = ((curveType === 'cubic') ? this.lerp(p3, p4, t) : this.lerp(p2, p3, t));
-    const D = this.lerp(A, B, t);
-    const E = this.lerp(B, C, t);
-    const P = this.lerp(D, E, t);
+    const A = lerp(p1, p2, t);
+    const B = lerp(p2, p3, t);
+    const C = ((curveType === 'cubic') ? lerp(p3, p4, t) : lerp(p2, p3, t));
+    const D = lerp(A, B, t);
+    const E = lerp(B, C, t);
+    const P = lerp(D, E, t);
 
     return (
       <Svg

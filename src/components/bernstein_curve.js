@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { COLORS, BREAKPOINT_SIZES, IS_MOBILE_USER_AGENT } from '../constants/constants';
+import { lerp } from '../constants/constants';
+import { p1weight, p2weight, p3weight, p4weight } from '../constants/constants';
 
 const getBreakpointFor = windowWidth =>
   Object.keys(BREAKPOINT_SIZES).find(
@@ -25,7 +27,7 @@ const getDeviceType = breakpoint => {
     }
 };
 
-class Bezier extends PureComponent {
+class BernsteinBezier extends PureComponent {
   state = {
     draggingPointId: null,
   };
@@ -38,12 +40,13 @@ class Bezier extends PureComponent {
     strokeWidth: PropTypes.number,
     updatePoint: PropTypes.func,
     t: PropTypes.number,
+    dependent: PropTypes.bool,
   };
 
   static defaultProps = {
     viewBoxWidth: 100,
     viewBoxHeight: 100,
-    strokeColor: COLORS.violet[500],
+    strokeColor: COLORS.black,
     strokeWidth: 6,
     grabbable: true,
   };
@@ -107,8 +110,9 @@ class Bezier extends PureComponent {
       strokeWidth,
       grabbable,
       t,
+      dependent,
     } = this.props;
-    const [p1, p2, p3, p4] = points;
+    const [p1, p2, p3, p4, origin] = points;
 
     const curveType = typeof p4 !== 'undefined' ? 'cubic' : 'quadratic';
 
@@ -127,15 +131,25 @@ class Bezier extends PureComponent {
     const lastPointId = curveType === 'cubic' ? 'p4' : 'p3';
 
     const isMobile = getDeviceType() === 'mobile';
+    // let dependent = true;
+    let w1point = lerp(origin, p1, p1weight(t));
+    let w2point = lerp(origin, p2, p2weight(t));
+    let w3point = lerp(origin, p3, p3weight(t));
+    let w4point = lerp(origin, p4, p4weight(t));
 
-    
-    const A = this.lerp(p1, p2, t);
-    const B = this.lerp(p2, p3, t);
-    const C = ((curveType === 'cubic') ? this.lerp(p3, p4, t) : this.lerp(p2, p3, t));
-    const D = this.lerp(A, B, t);
-    const E = this.lerp(B, C, t);
-    const P = this.lerp(D, E, t);
-    console.log([A, B, C, D, E, P]);
+    if (dependent) {
+        const w1pointoffset = [w1point[0]-origin[0], w1point[1]-origin[1]];
+        const w2pointoffset = [w2point[0]-origin[0], w2point[1]-origin[1]];
+        const w3pointoffset = [w3point[0]-origin[0], w3point[1]-origin[1]];
+        w2point[0] += w1pointoffset[0]
+        w2point[1] += w1pointoffset[1]
+
+        w3point[0] += w1pointoffset[0] + w2pointoffset[0]
+        w3point[1] += w1pointoffset[1] + w2pointoffset[1]
+
+        w4point[0] += w1pointoffset[0] + w2pointoffset[0] + w3pointoffset[0]
+        w4point[1] += w1pointoffset[1] + w2pointoffset[1] + w3pointoffset[1]
+    }
 
     return (
       <Svg
@@ -161,24 +175,35 @@ class Bezier extends PureComponent {
           stroke={strokeColor}
           strokeWidth={strokeWidth}
         />
-        {curveType === 'cubic' && (<>
-            <ControlPoint cx={A[0]} cy={A[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={B[0]} cy={B[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={C[0]} cy={C[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={A[0]} y1={A[1]} x2={B[0]} y2={B[1]} />
-            <ControlLine x1={B[0]} y1={B[1]} x2={C[0]} y2={C[1]} />
-            <ControlPoint cx={D[0]} cy={D[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={E[0]} cy={E[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={D[0]} y1={D[1]} x2={E[0]} y2={E[1]} />
-            <ControlPoint cx={P[0]} cy={P[1]} grabbable={false} isMobile={isMobile} />
-        </>)}
 
-        {curveType === 'quadratic' && (<>
-            <ControlPoint cx={A[0]} cy={A[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={B[0]} cy={B[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={A[0]} y1={A[1]} x2={B[0]} y2={B[1]} />
-            <ControlPoint cx={D[0]} cy={D[1]} grabbable={false} isMobile={isMobile} />
-        </>)}
+        
+        <ControlPoint cx={w1point[0]} cy={w1point[1]} grabbable={false} isMobile={isMobile}/>
+        <ControlPoint cx={w2point[0]} cy={w2point[1]} grabbable={false} isMobile={isMobile}/>
+        <ControlPoint cx={w3point[0]} cy={w3point[1]} grabbable={false} isMobile={isMobile}/>
+        <ControlPoint cx={w4point[0]} cy={w4point[1]} grabbable={false} isMobile={isMobile}/>
+        {
+            (dependent) ? <>
+                <ControlLineP1 x1={origin[0]} y1={origin[1]} x2={w1point[0]} y2={w1point[1]} />
+                <ControlLineP2 x1={w1point[0]} y1={w1point[1]} x2={w2point[0]} y2={w2point[1]} />
+                <ControlLineP3 x1={w2point[0]} y1={w2point[1]} x2={w3point[0]} y2={w3point[1]} />
+                <ControlLineP4 x1={w3point[0]} y1={w3point[1]} x2={w4point[0]} y2={w4point[1]} />
+            </>
+            : <>
+                <ControlLineP1 x1={origin[0]} y1={origin[1]} x2={w1point[0]} y2={w1point[1]} />
+                <ControlLineP2 x1={origin[0]} y1={origin[1]} x2={w2point[0]} y2={w2point[1]} />
+                <ControlLineP3 x1={origin[0]} y1={origin[1]} x2={w3point[0]} y2={w3point[1]} />
+                <ControlLineP4 x1={origin[0]} y1={origin[1]} x2={w4point[0]} y2={w4point[1]} />
+            </>
+        }
+        
+        <EndPoint
+          cx={origin[0]}
+          cy={origin[1]}
+          onMouseDown={this.handleSelectPoint('origin')}
+          onTouchStart={this.handleSelectPoint('origin')}
+          grabbable={grabbable}
+          isMobile={isMobile}
+        />
 
         <EndPoint
           cx={p1[0]}
@@ -217,6 +242,7 @@ class Bezier extends PureComponent {
           grabbable={grabbable}
           isMobile={isMobile}
         />
+        
       </Svg>
     );
   }
@@ -290,5 +316,25 @@ const ControlLine = styled.line`
   stroke-dasharray: 5, 5;
   stroke-width: 2;
 `;
+const ControlLineP1 = styled.line`
+  stroke: ${"#ff0000"};
+//   stroke-dasharray: 5, 5;
+  stroke-width: 6;
+`;
+const ControlLineP2 = styled.line`
+  stroke: ${"#ffff00"};
+//   stroke-dasharray: 5, 5;
+  stroke-width: 6;
+`;
+const ControlLineP3 = styled.line`
+  stroke: ${"#00ff00"};
+//   stroke-dasharray: 5, 5;
+  stroke-width: 6;
+`;
+const ControlLineP4 = styled.line`
+  stroke: ${"#00ccff"};
+//   stroke-dasharray: 5, 5;
+  stroke-width: 6;
+`;
 
-export default Bezier;
+export default BernsteinBezier;

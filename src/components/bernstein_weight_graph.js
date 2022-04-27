@@ -33,7 +33,6 @@ class BernsteinWeightGraph extends PureComponent {
   static propTypes = {
     viewBoxWidth: PropTypes.number,
     viewBoxHeight: PropTypes.number,
-    strokeColor: PropTypes.string,
     strokeWidth: PropTypes.number,
     t: PropTypes.number,
     
@@ -42,7 +41,6 @@ class BernsteinWeightGraph extends PureComponent {
   static defaultProps = {
     viewBoxWidth: 1000,
     viewBoxHeight: 1000,
-    strokeColor: COLORS.violet[500],
     strokeWidth: 6,
     grabbable: false,
   };
@@ -51,7 +49,6 @@ class BernsteinWeightGraph extends PureComponent {
     const {
       viewBoxWidth,
       viewBoxHeight,
-      strokeColor,
       strokeWidth,
       t,
     } = this.props;
@@ -92,10 +89,10 @@ class BernsteinWeightGraph extends PureComponent {
             viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
             ref={node => (this.node = node)}
           >
-            <path d={p1Line} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} />
-            <path d={p2Line} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} />
-            <path d={p3Line} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} />
-            <path d={p4Line} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} />
+            <path d={p1Line} fill="none" stroke="#ff0000" strokeWidth={strokeWidth} />
+            <path d={p2Line} fill="none" stroke="#ffff00"strokeWidth={strokeWidth} />
+            <path d={p3Line} fill="none" stroke="#00ff00" strokeWidth={strokeWidth} />
+            <path d={p4Line} fill="none" stroke="#00ccff" strokeWidth={strokeWidth} />
             <EndPoint cx={p1[0]} cy={p1[1]} grabbable={false} sMobile={isMobile} />
             <EndPoint cx={p2[0]} cy={p2[1]} grabbable={false} sMobile={isMobile} />
             <EndPoint cx={p3[0]} cy={p3[1]} grabbable={false} sMobile={isMobile} />
@@ -103,10 +100,10 @@ class BernsteinWeightGraph extends PureComponent {
           </Svg>
         </div>
         <div>
-          <ProgressBar percent={p1weight(t)}/>
-          <ProgressBar percent={p2weight(t)}/>
-          <ProgressBar percent={p3weight(t)}/>
-          <ProgressBar percent={p4weight(t)}/>
+          <ProgressBar backgroundColor={"#ff0000"} percent={p1weight(t)}/>
+          <ProgressBar backgroundColor={"#ffff00"} percent={p2weight(t)}/>
+          <ProgressBar backgroundColor={"#00ff00"} percent={p3weight(t)}/>
+          <ProgressBar backgroundColor={"#00ccff"} percent={p4weight(t)}/>
         </div>
       </div>
     );

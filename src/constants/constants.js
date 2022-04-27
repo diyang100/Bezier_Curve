@@ -95,7 +95,11 @@ export const Z_INDICES = {
     header: 100,
 };
 
-export let p1weight = (t) => { return ( -(t**3) + (3*(t**2)) - (3*t)+1 ); }
-export let p2weight = (t) => { return ( (3*(t**3)) - (6*(t**2)) + (3*t) )}
-export let p3weight = (t) => { return ( (-3*(t**3)) + (3*(t**2)) )}
-export let p4weight = (t) => { return (t**3) }
+export const lerp = (p1, p2, t) => {
+    return [(1-t)*p1[0] + t*p2[0], (1-t)*p1[1] + t*p2[1]];
+}
+
+export const p1weight = (t) => { return ( -(t**3) + (3*(t**2)) - (3*t)+1 ); }
+export const p2weight = (t) => { return ( (3*(t**3)) - (6*(t**2)) + (3*t) )}
+export const p3weight = (t) => { return ( (-3*(t**3)) + (3*(t**2)) )}
+export const p4weight = (t) => { return (t**3) }
