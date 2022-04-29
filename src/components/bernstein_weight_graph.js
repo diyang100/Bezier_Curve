@@ -2,31 +2,11 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { COLORS, BREAKPOINT_SIZES, IS_MOBILE_USER_AGENT } from '../constants/constants';
+import { COLORS } from '../constants/constants';
 import { p1weight, p2weight, p3weight, p4weight } from '../constants/constants';
+import { getDeviceType } from '../constants/constants';
 import './bezier.css';
 import ProgressBar from './progress_bar';
-
-const getBreakpointFor = windowWidth =>
-  Object.keys(BREAKPOINT_SIZES).find(
-    name => windowWidth <= BREAKPOINT_SIZES[name]
-  ) || 'xl';
-  
-const getDeviceType = breakpoint => {
-    if (typeof window === 'undefined') {
-        return 'desktop';
-    }
-
-    if (!breakpoint) {
-        breakpoint = getBreakpointFor(window.innerWidth);
-    }
-
-    if (breakpoint === 'xs' || breakpoint === 'sm' || IS_MOBILE_USER_AGENT) {
-        return 'mobile';
-    } else {
-        return 'desktop';
-    }
-};
 
 class BernsteinWeightGraph extends PureComponent {
 
@@ -63,6 +43,8 @@ class BernsteinWeightGraph extends PureComponent {
     //         M ${p1[0]},${p1[1]}
     //         Q ${p2[0]},${p2[1]} ${p3[0]},${p3[1]}
     //       `;
+
+    // TODO: change 1000 constant to variable passed
     const stepSize = 0.001;
     let p1Line = "M 0 0 ";
     let p2Line = "M 0 1000 ";
@@ -89,6 +71,7 @@ class BernsteinWeightGraph extends PureComponent {
             viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
             ref={node => (this.node = node)}
           >
+            {/* TODO: fix colours to constants file */}
             <path d={p1Line} fill="none" stroke="#ff0000" strokeWidth={strokeWidth} />
             <path d={p2Line} fill="none" stroke="#ffff00"strokeWidth={strokeWidth} />
             <path d={p3Line} fill="none" stroke="#00ff00" strokeWidth={strokeWidth} />

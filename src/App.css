@@ -13,40 +13,23 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* .header-sections {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+  flex-direction: column;
+} */
 
 .module-wrapper {
   width: 75%;
-  margin: 35px auto;
+  margin: 0px auto;
 }
 
 .grid-container {
   height: 300px;
   display: grid;
-  grid-template-columns: auto auto auto;
   place-items: center;
+  gap: 10px;
 }
 
 .grid-item {
@@ -56,34 +39,134 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  /* border-radius: 20%; */
 }
+.main-curve {
+  position: relative;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
 
 /* Extra small devices (phones) */
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 600px) {
+  .header {
+    width: 100%;
+    height: 200px;
+    background-color: #282c34;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    /* position: fixed; */
+    padding: 70px 0px 20px 0px ;
+    z-index: 20;
+    flex-wrap: wrap;
+  }
+
+  .slider-wrapper {
+    background-color: #282c34;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    padding: 10px;
+    z-index: inherit;
+  }
+
+  .header > div {
+    font-size: medium;
+    flex: 20%;
+  }
+
   .grid-container {
-    height: 300px;
-    display: grid;
     grid-template-columns: auto;
-    place-items: center;
   }
 }
 
-/* Small devices (tablets and large phones) */
-@media only screen and (min-width: 500px) {
+/* Medium (tablets) */
+@media only screen and (min-width:600px) and (max-width: 992px) {
+  .header {
+    width: 100%;
+    height: 100px;
+    background-color: #282c34;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: fixed;
+    padding: 20px 0px;
+    z-index: 20;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  
+  .header-padding {
+    padding: 80px;
+  }
+
+  .header > div {
+    font-size: medium;
+    flex: 40%;
+  }
+
   .grid-container {
-    height: 300px;
-    display: grid;
     grid-template-columns: auto auto;
-    place-items: center;
   }
 }
 
-/* Large devices (laptops/desktops) */
-@media only screen and (min-width: 769px) {
+/* large devices (laptops) */
+@media only screen and (min-width: 992px) and (max-width: 1200px) {
+  .header {
+    width: 100%;
+    background-color: #282c34;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: fixed;
+    padding: 20px;
+    z-index: 20;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .header-padding {
+    padding: 60px;
+  }
+
+  .header > div {
+    font-size: small;
+  }
+
   .grid-container {
-    height: 300px;
-    display: grid;
+    grid-template-columns: auto auto;
+  }
+}
+
+/* Extra Large devices (desktops) */
+@media only screen and (min-width: 1200px) {
+  .header {
+    width: 100%;
+    background-color: #282c34;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: fixed;
+    padding: 20px;
+    z-index: 20;
+    gap: 20px;
+  }
+  
+  .header-padding {
+    padding: 60px;
+  }
+  
+  .grid-container {
     grid-template-columns: auto auto auto;
-    place-items: center;
   }
 }

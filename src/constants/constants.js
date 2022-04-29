@@ -59,7 +59,7 @@ export const COLORS = {
 
 export const BREAKPOINT_SIZES = {
     xs: 320,
-    sm: 540,
+    sm: 600,
     md: 900,
     lg: 1024,
     xl: 1440,
@@ -103,3 +103,17 @@ export const p1weight = (t) => { return ( -(t**3) + (3*(t**2)) - (3*t)+1 ); }
 export const p2weight = (t) => { return ( (3*(t**3)) - (6*(t**2)) + (3*t) )}
 export const p3weight = (t) => { return ( (-3*(t**3)) + (3*(t**2)) )}
 export const p4weight = (t) => { return (t**3) }
+
+export const getBreakpointFor = windowWidth =>  
+    Object.keys(BREAKPOINT_SIZES).find(
+        name => windowWidth <= BREAKPOINT_SIZES[name]
+    ) || 'xl';
+  
+export const getDeviceType = breakpoint => {
+    if (typeof window === 'undefined') return 'desktop';
+
+    if (!breakpoint) breakpoint = getBreakpointFor(window.innerWidth);
+
+    if (breakpoint === 'xs' || breakpoint === 'sm' || IS_MOBILE_USER_AGENT) return 'mobile'; 
+    else return 'desktop';
+};

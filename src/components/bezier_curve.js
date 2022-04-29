@@ -2,33 +2,14 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { COLORS, BREAKPOINT_SIZES, IS_MOBILE_USER_AGENT } from '../constants/constants';
+import { COLORS } from '../constants/constants';
 import { lerp } from '../constants/constants';
-
-const getBreakpointFor = windowWidth =>
-  Object.keys(BREAKPOINT_SIZES).find(
-    name => windowWidth <= BREAKPOINT_SIZES[name]
-  ) || 'xl';
-  
-const getDeviceType = breakpoint => {
-    if (typeof window === 'undefined') {
-        return 'desktop';
-    }
-
-    if (!breakpoint) {
-        breakpoint = getBreakpointFor(window.innerWidth);
-    }
-
-    if (breakpoint === 'xs' || breakpoint === 'sm' || IS_MOBILE_USER_AGENT) {
-        return 'mobile';
-    } else {
-        return 'desktop';
-    }
-};
+import { getDeviceType } from '../constants/constants';
 
 class Bezier extends PureComponent {
   state = {
     draggingPointId: null,
+    selectedLine: -1,
   };
 
   static propTypes = {
@@ -45,16 +26,17 @@ class Bezier extends PureComponent {
     viewBoxWidth: 100,
     viewBoxHeight: 100,
     strokeColor: COLORS.violet[500],
-    strokeWidth: 6,
+    strokeWidth: 10,
     grabbable: true,
   };
 
   handleSelectPoint = pointId => () => {
-    if (this.props.grabbable) {
-      // TODO: Get distance from point center, so that clicking and dragging a
-      // new point doesn't center it on the cursor.
-      this.setState({ draggingPointId: pointId });
-    }
+    if (this.props.grabbable) this.setState({ draggingPointId: pointId });
+  };
+
+  handleSelectLine = lineId => () => {
+    console.log(lineId);
+    this.setState({ selectedLine: lineId });
   };
 
   handleRelease = () => {
@@ -86,7 +68,9 @@ class Bezier extends PureComponent {
       (positionRelativeToSvg[0] * viewBoxWidth) / svgBB.width,
       (positionRelativeToSvg[1] * viewBoxHeight) / svgBB.height,
     ];
-    console.log(positionWithinViewBox);
+    // TODO: change 1000 constant to variable passed
+    positionWithinViewBox[1] = 1000 - positionWithinViewBox[1];
+    // console.log(positionWithinViewBox);
     if (positionRelativeToSvg[0] < 0 
         || positionRelativeToSvg[0] > svgBB.width 
         || positionRelativeToSvg[1] < 0 
@@ -105,27 +89,23 @@ class Bezier extends PureComponent {
       grabbable,
       t,
     } = this.props;
-    const [p1, p2, p3, p4] = points;
-
+    let [p1, p2, p3, p4] = points;
     const curveType = typeof p4 !== 'undefined' ? 'cubic' : 'quadratic';
 
-    const instructions =
-      curveType === 'cubic'
-        ? `
-            M ${p1[0]},${p1[1]}
-            C ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}
-          `
-        : `
-            M ${p1[0]},${p1[1]}
-            Q ${p2[0]},${p2[1]} ${p3[0]},${p3[1]}
-          `;
+    // TODO: change 1000 constant to variable passed
+    p1[1] = 1000 - p1[1];
+    p2[1] = 1000 - p2[1];
+    p3[1] = 1000 - p3[1];
+    if (curveType === 'cubic') p4[1] = 1000 - p4[1];
 
-    const lastPoint = curveType === 'cubic' ? p4 : p3;
-    const lastPointId = curveType === 'cubic' ? 'p4' : 'p3';
+    const instructions =
+      `
+        M ${p1[0]},${p1[1]}
+        C ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}
+      `
 
     const isMobile = getDeviceType() === 'mobile';
 
-    
     const A = lerp(p1, p2, t);
     const B = lerp(p2, p3, t);
     const C = ((curveType === 'cubic') ? lerp(p3, p4, t) : lerp(p2, p3, t));
@@ -143,75 +123,61 @@ class Bezier extends PureComponent {
         onTouchEnd={this.handleRelease}
       >
         <ControlLine x1={p1[0]} y1={p1[1]} x2={p2[0]} y2={p2[1]} />
-        {curveType === 'quadratic' && (
-          <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
-        )}
-        {curveType === 'cubic' && (<>
-            <ControlLine x1={p3[0]} y1={p3[1]} x2={p4[0]} y2={p4[1]} />
-            <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
-        </>)}
+        <ControlLine x1={p3[0]} y1={p3[1]} x2={p4[0]} y2={p4[1]} />
+        <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
 
-        <path
-          d={instructions}
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-        />
-        {curveType === 'cubic' && (<>
-            <ControlPoint cx={A[0]} cy={A[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={B[0]} cy={B[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={C[0]} cy={C[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={A[0]} y1={A[1]} x2={B[0]} y2={B[1]} />
-            <ControlLine x1={B[0]} y1={B[1]} x2={C[0]} y2={C[1]} />
-            <ControlPoint cx={D[0]} cy={D[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={E[0]} cy={E[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={D[0]} y1={D[1]} x2={E[0]} y2={E[1]} />
-            <ControlPoint cx={P[0]} cy={P[1]} grabbable={false} isMobile={isMobile} />
-        </>)}
+        <g onClick={this.handleSelectLine(1)}>
+          <path
+            d={instructions}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            // onMouseDown={console.log(0)}
+            // onTouchStart={console.log(1)}
+          />
+        </g>
+        {/* <g onClick={this.handleSelectLine(2)}>
+          <path
+            d={"M 200 200 L 200 400 "}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            // onMouseDown={console.log(1)}
+            // onTouchStart={console.log(1)}
+          />
+        </g> */}
+        <ControlPoint cx={A[0]} cy={A[1]} grabbable={false} isMobile={isMobile} />
+        <ControlPoint cx={B[0]} cy={B[1]} grabbable={false} isMobile={isMobile} />
+        <ControlPoint cx={C[0]} cy={C[1]} grabbable={false} isMobile={isMobile} />
+        <ControlLine x1={A[0]} y1={A[1]} x2={B[0]} y2={B[1]} />
+        <ControlLine x1={B[0]} y1={B[1]} x2={C[0]} y2={C[1]} />
+        <ControlPoint cx={D[0]} cy={D[1]} grabbable={false} isMobile={isMobile} />
+        <ControlPoint cx={E[0]} cy={E[1]} grabbable={false} isMobile={isMobile} />
+        <ControlLine x1={D[0]} y1={D[1]} x2={E[0]} y2={E[1]} />
+        <ControlPoint cx={P[0]} cy={P[1]} grabbable={false} isMobile={isMobile} />
 
-        {curveType === 'quadratic' && (<>
-            <ControlPoint cx={A[0]} cy={A[1]} grabbable={false} isMobile={isMobile} />
-            <ControlPoint cx={B[0]} cy={B[1]} grabbable={false} isMobile={isMobile} />
-            <ControlLine x1={A[0]} y1={A[1]} x2={B[0]} y2={B[1]} />
-            <ControlPoint cx={D[0]} cy={D[1]} grabbable={false} isMobile={isMobile} />
-        </>)}
-
-        <EndPoint
-          cx={p1[0]}
-          cy={p1[1]}
+        <EndPoint cx={p1[0]} cy={p1[1]}
           onMouseDown={this.handleSelectPoint('p1')}
           onTouchStart={this.handleSelectPoint('p1')}
-          grabbable={grabbable}
-          isMobile={isMobile}
+          grabbable={grabbable} isMobile={isMobile}
         />
 
-        <EndPoint
-          cx={p2[0]}
-          cy={p2[1]}
+        <EndPoint cx={p2[0]} cy={p2[1]}
           onMouseDown={this.handleSelectPoint('p2')}
           onTouchStart={this.handleSelectPoint('p2')}
-          grabbable={grabbable}
-          isMobile={isMobile}
+          grabbable={grabbable} isMobile={isMobile}
         />
 
-        {curveType === 'cubic' && (
-          <EndPoint
-            cx={p3[0]}
-            cy={p3[1]}
-            onMouseDown={this.handleSelectPoint('p3')}
-            onTouchStart={this.handleSelectPoint('p3')}
-            grabbable={grabbable}
-            isMobile={isMobile}
-          />
-        )}
+        <EndPoint cx={p3[0]} cy={p3[1]}
+          onMouseDown={this.handleSelectPoint('p3')}
+          onTouchStart={this.handleSelectPoint('p3')}
+          grabbable={grabbable}isMobile={isMobile}
+        />
 
-        <EndPoint
-          cx={lastPoint[0]}
-          cy={lastPoint[1]}
-          onMouseDown={this.handleSelectPoint(lastPointId)}
-          onTouchStart={this.handleSelectPoint(lastPointId)}
-          grabbable={grabbable}
-          isMobile={isMobile}
+        <EndPoint cx={p4[0]} cy={p4[1]}
+          onMouseDown={this.handleSelectPoint('p4')}
+          onTouchStart={this.handleSelectPoint('p4')}
+          grabbable={grabbable} isMobile={isMobile}
         />
       </Svg>
     );
