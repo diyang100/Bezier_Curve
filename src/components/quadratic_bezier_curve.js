@@ -39,21 +39,21 @@ class QuadBezier extends PureComponent {
       grabbable,
       t,
     } = this.props;
-    let [p1, p2, p3, p4] = points;
-    const curveType = typeof p4 !== 'undefined' ? 'cubic' : 'quadratic';
+    let [p1, p2, p3, origin] = points;
 
     // TODO: change 1000 constant to variable passed
     p1[1] = 1000 - p1[1];
     p2[1] = 1000 - p2[1];
     p3[1] = 1000 - p3[1];
-    if (curveType === 'cubic') p4[1] = 1000 - p4[1];
+    origin[1] = 1000 - origin[1];
     
     const A = lerp(p1, p2, t);
     const B = lerp(p2, p3, t);
     const C = lerp(A, B, t);
 
-    //TODO: move this to constants
-    const offset = [viewBoxWidth/2, -viewBoxHeight/2];
+    //TODO: remove offset
+    // const offset = [viewBoxWidth/2, -viewBoxHeight/2];
+    const offset = [0, 0];
 
     const instructions =
         `
@@ -80,6 +80,8 @@ class QuadBezier extends PureComponent {
         <ControlLine x1={p2[0] + offset[0]} y1={p2[1] + offset[1]} x2={p3[0] + offset[0]} y2={p3[1] + offset[1]} />
 
         <path d={instructions} fill="none" stroke={strokeColor} strokeWidth={strokeWidth}/>
+        <path d={`M ${(origin[0].toFixed(5))} 0 V 1000`}  fill="none" stroke="#aaaaaa" strokeWidth={strokeWidth}/>
+        <path d={`M 0 ${(origin[1].toFixed(5))} H 1000`}  fill="none" stroke="#aaaaaa" strokeWidth={strokeWidth}/>
         <ControlPoint cx={A[0] + offset[0]} cy={A[1] + offset[1]} grabbable={false} isMobile={isMobile} />
         <ControlPoint cx={B[0] + offset[0]} cy={B[1] + offset[1]} grabbable={false} isMobile={isMobile} />
         <ControlLine x1={A[0] + offset[0]} y1={A[1] + offset[1]} x2={B[0] + offset[0]} y2={B[1] + offset[1]} />
@@ -105,16 +107,16 @@ class QuadBezier extends PureComponent {
           grabbable={grabbable}
           isMobile={isMobile}
         />
-        {/* TODO: make this origin point a constant */}
-        <EndPoint
-          cx={0 + offset[0]}
-          cy={1000 + offset[1]}
-          grabbable={false}
-          isMobile={isMobile}
-        />
-        <VectorLine x1={0 + offset[0]} y1={1000 + offset[1]} 
+        <VectorLine x1={origin[0] + offset[0]} y1={origin[1] + offset[1]} 
           x2={C[0] + offset[0]} y2={C[1] + offset[1]}
           style={{ markerEnd:"url(#arrow)" }}
+        />
+        {/* TODO: make this origin point a constant */}
+        <EndPoint
+          cx={origin[0] + offset[0]}
+          cy={origin[1] + offset[1]}
+          grabbable={false}
+          isMobile={isMobile}
         />
       </Svg>
     );

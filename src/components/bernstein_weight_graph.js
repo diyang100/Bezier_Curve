@@ -73,13 +73,14 @@ class BernsteinWeightGraph extends PureComponent {
           >
             {/* TODO: fix colours to constants file */}
             <path d={p1Line} fill="none" stroke="#ff0000" strokeWidth={strokeWidth} />
-            <path d={p2Line} fill="none" stroke="#ffff00"strokeWidth={strokeWidth} />
+            <path d={p2Line} fill="none" stroke="#ffff00" strokeWidth={strokeWidth} />
             <path d={p3Line} fill="none" stroke="#00ff00" strokeWidth={strokeWidth} />
             <path d={p4Line} fill="none" stroke="#00ccff" strokeWidth={strokeWidth} />
-            <EndPoint cx={p1[0]} cy={p1[1]} grabbable={false} sMobile={isMobile} />
-            <EndPoint cx={p2[0]} cy={p2[1]} grabbable={false} sMobile={isMobile} />
-            <EndPoint cx={p3[0]} cy={p3[1]} grabbable={false} sMobile={isMobile} />
-            <EndPoint cx={p4[0]} cy={p4[1]} grabbable={false} sMobile={isMobile} />
+            <path d={`M ${(t.toFixed(5) * 1000)} 0 V 1000`}  fill="none" stroke="#aaaaaa" strokeWidth={strokeWidth}/>
+            <ControlPoint stroke="#ff0000" cx={p1[0]} cy={p1[1]} grabbable={false} sMobile={isMobile} />
+            <ControlPoint stroke="#ffff00" cx={p2[0]} cy={p2[1]} grabbable={false} sMobile={isMobile} />
+            <ControlPoint stroke="#00ff00" cx={p3[0]} cy={p3[1]} grabbable={false} sMobile={isMobile} />
+            <ControlPoint stroke="#00ccff" cx={p4[0]} cy={p4[1]} grabbable={false} sMobile={isMobile} />
           </Svg>
         </div>
         <div>
@@ -100,6 +101,7 @@ const ControlPoint = ({
   onTouchStart,
   grabbable,
   isMobile,
+  stroke,
 }) => (
   <g>
     <VisibleControlPoint
@@ -107,6 +109,7 @@ const ControlPoint = ({
       cy={cy}
       grabbable={grabbable}
       isMobile={isMobile}
+      stroke={stroke}
     />
     <InvisibleHandle
       cx={cx}
@@ -144,7 +147,7 @@ const VisibleControlPoint = styled(Point).attrs(props => ({
   ry: props.isMobile ? 20 : 8,
 }))`
   fill: white;
-  stroke: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
+  // stroke: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
   stroke-width: 3;
 `;
 

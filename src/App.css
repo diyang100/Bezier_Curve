@@ -76,7 +76,7 @@
 
   .header > div {
     font-size: medium;
-    flex: 20%;
+    flex: 30%;
   }
 
   .grid-container {
@@ -167,6 +167,6 @@
   }
   
   .grid-container {
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto auto auto;
   }
 }

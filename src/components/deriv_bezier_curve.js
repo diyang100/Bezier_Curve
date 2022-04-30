@@ -45,7 +45,7 @@ class DerivBezier extends PureComponent {
 
   render() {
     const { points, viewBoxWidth, viewBoxHeight, strokeColor, strokeWidth, grabbable, t } = this.props;
-    let [p1, p2, p3, p4] = points;
+    let [p1, p2, p3, p4, display_deriv_p] = points;
     
 
     // TODO: change 1000 constant to variable passed
@@ -53,6 +53,7 @@ class DerivBezier extends PureComponent {
     p2[1] = 1000 - p2[1];
     p3[1] = 1000 - p3[1];
     p4[1] = 1000 - p4[1];
+    display_deriv_p[1] = 1000 - display_deriv_p[1];
 
     const A = lerp(p1, p2, t);
     const B = lerp(p2, p3, t);
@@ -61,11 +62,12 @@ class DerivBezier extends PureComponent {
     const E = lerp(B, C, t);
     const P = lerp(D, E, t);
 
-    const deriv_point = this.derivP(p1, p2, p3, p4, t);
-    const display_deriv_p = [P[0]+(deriv_point[0]/3), P[1]+(deriv_point[1]/3)];
+    // const deriv_point = this.derivP(p1, p2, p3, p4, t);
+    // const display_deriv_p = [P[0]+(deriv_point[0]/3), P[1]+(deriv_point[1]/3)];
 
     //TODO: move this to constants
-    const offset = [viewBoxWidth/4, viewBoxHeight/4];
+    // const offset = [viewBoxWidth/4, viewBoxHeight/4];
+    const offset = [0, 0];
 
     const instructions = 
       `M ${p1[0] + offset[0]},${p1[1] + offset[1]} 

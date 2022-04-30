@@ -31,56 +31,6 @@ class BernsteinBezier extends PureComponent {
     grabbable: true,
   };
 
-  handleSelectPoint = pointId => () => {
-    if (this.props.grabbable) {
-      // TODO: Get distance from point center, so that clicking and dragging a
-      // new point doesn't center it on the cursor.
-      this.setState({ draggingPointId: pointId });
-    }
-  };
-
-  handleRelease = () => {
-    this.setState({ draggingPointId: null });
-  };
-
-  handleDrag = ev => {
-    // This event handles both mouseMove and touchMove.
-    let x, y;
-    if (ev.touches) {
-      ev.preventDefault();
-      const touch = ev.touches[0];
-      [x, y] = [touch.clientX, touch.clientY];
-    } else {
-      [x, y] = [ev.clientX, ev.clientY];
-    }
-
-    const { viewBoxWidth, viewBoxHeight, updatePoint, grabbable } = this.props;
-    const { draggingPointId } = this.state;
-
-    if (!draggingPointId || !grabbable || !updatePoint) {
-      return;
-    }
-
-    const svgBB = this.node.getBoundingClientRect();
-    const positionRelativeToSvg = [x - svgBB.left, y - svgBB.top];
-
-    const positionWithinViewBox = [
-      (positionRelativeToSvg[0] * viewBoxWidth) / svgBB.width,
-      (positionRelativeToSvg[1] * viewBoxHeight) / svgBB.height,
-    ];
-
-    // TODO: change 1000 constant to variable passed
-    positionWithinViewBox[1] = 1000 - positionWithinViewBox[1];
-    // console.log(positionWithinViewBox);
-
-    if (positionRelativeToSvg[0] < 0 
-        || positionRelativeToSvg[0] > svgBB.width 
-        || positionRelativeToSvg[1] < 0 
-        || positionRelativeToSvg[1] > svgBB.height) return;
-
-    updatePoint(draggingPointId, positionWithinViewBox);
-  };
-
   lerp = (p1, p2, t) => {
       return [(1-t)*p1[0] + t*p2[0], (1-t)*p1[1] + t*p2[1]];
   }
@@ -108,18 +58,10 @@ class BernsteinBezier extends PureComponent {
     point_of_reference[1] = 1000 - point_of_reference[1];
 
     const instructions =
-      curveType === 'cubic'
-        ? `
-            M ${p1[0]},${p1[1]}
-            C ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}
-          `
-        : `
-            M ${p1[0]},${p1[1]}
-            Q ${p2[0]},${p2[1]} ${p3[0]},${p3[1]}
-          `;
-
-    const lastPoint = curveType === 'cubic' ? p4 : p3;
-    const lastPointId = curveType === 'cubic' ? 'p4' : 'p3';
+      `
+        M ${p1[0]},${p1[1]}
+        C ${p2[0]},${p2[1]} ${p3[0]},${p3[1]} ${p4[0]},${p4[1]}
+      `
 
     const isMobile = getDeviceType() === 'mobile';
     // let dependent = true;
@@ -174,13 +116,8 @@ class BernsteinBezier extends PureComponent {
           </marker>
         </defs>
         <ControlLine x1={p1[0]} y1={p1[1]} x2={p2[0]} y2={p2[1]} />
-        {curveType === 'quadratic' && (
-          <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
-        )}
-        {curveType === 'cubic' && (<>
-            <ControlLine x1={p3[0]} y1={p3[1]} x2={p4[0]} y2={p4[1]} />
-            <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
-        </>)}
+        <ControlLine x1={p3[0]} y1={p3[1]} x2={p4[0]} y2={p4[1]} />
+        <ControlLine x1={p2[0]} y1={p2[1]} x2={p3[0]} y2={p3[1]} />
 
         <path
           d={instructions}
@@ -189,11 +126,39 @@ class BernsteinBezier extends PureComponent {
           strokeWidth={strokeWidth}
         />
 
-        
+        <EndPoint
+          cx={p1[0]}
+          cy={p1[1]}
+          grabbable={false}
+          isMobile={isMobile}
+        />
+
+        <EndPoint
+          cx={p2[0]}
+          cy={p2[1]}
+          grabbable={false}
+          isMobile={isMobile}
+        />
+
+        <EndPoint
+          cx={p3[0]}
+          cy={p3[1]}
+          grabbable={false}
+          isMobile={isMobile}
+        />
+
+        <EndPoint
+          cx={p4[0]}
+          cy={p4[1]}
+          grabbable={false}
+          isMobile={isMobile}
+        />
+
         {/* <ControlPoint cx={w1point[0]} cy={w1point[1]} grabbable={false} isMobile={isMobile}/>
         <ControlPoint cx={w2point[0]} cy={w2point[1]} grabbable={false} isMobile={isMobile}/>
         <ControlPoint cx={w3point[0]} cy={w3point[1]} grabbable={false} isMobile={isMobile}/>
         <ControlPoint cx={w4point[0]} cy={w4point[1]} grabbable={false} isMobile={isMobile}/> */}
+        {/* TODO: hide arrows when line length is less than a threshold */}
         {
             (dependent) ? <>
                 <ControlLineP1 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w1point[0]} y2={w1point[1]} style={{ markerEnd:"url(#arrow1)" }} />
@@ -212,47 +177,7 @@ class BernsteinBezier extends PureComponent {
         <EndPoint
           cx={point_of_reference[0]}
           cy={point_of_reference[1]}
-          onMouseDown={this.handleSelectPoint('point_of_reference')}
-          onTouchStart={this.handleSelectPoint('point_of_reference')}
-          grabbable={grabbable}
-          isMobile={isMobile}
-        />
-
-        <EndPoint
-          cx={p1[0]}
-          cy={p1[1]}
-          onMouseDown={this.handleSelectPoint('p1')}
-          onTouchStart={this.handleSelectPoint('p1')}
-          grabbable={grabbable}
-          isMobile={isMobile}
-        />
-
-        <EndPoint
-          cx={p2[0]}
-          cy={p2[1]}
-          onMouseDown={this.handleSelectPoint('p2')}
-          onTouchStart={this.handleSelectPoint('p2')}
-          grabbable={grabbable}
-          isMobile={isMobile}
-        />
-
-        {curveType === 'cubic' && (
-          <EndPoint
-            cx={p3[0]}
-            cy={p3[1]}
-            onMouseDown={this.handleSelectPoint('p3')}
-            onTouchStart={this.handleSelectPoint('p3')}
-            grabbable={grabbable}
-            isMobile={isMobile}
-          />
-        )}
-
-        <EndPoint
-          cx={lastPoint[0]}
-          cy={lastPoint[1]}
-          onMouseDown={this.handleSelectPoint(lastPointId)}
-          onTouchStart={this.handleSelectPoint(lastPointId)}
-          grabbable={grabbable}
+          grabbable={false}
           isMobile={isMobile}
         />
         
