@@ -55,6 +55,15 @@ export const COLORS = {
     },
     white: '#FFF',
     black: '#000',
+    palette: {
+        black: '#0A1929',
+        cyan: '#44FFD2',
+        lightCyan: '#A1FFE9',
+        orange: '#FF6B35',
+        red: '#880D1E',
+        yellow: '#FFFF69',
+        green: '#78ff6c',
+    }
 };
 
 export const BREAKPOINT_SIZES = {

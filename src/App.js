@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 
 import Slider from './components/slider';
+import Button from './components/button';
 
 import './App.css';
 // import { p1weight, p2weight, p3weight, p4weight } from './constants/constants';
@@ -23,7 +24,7 @@ class App extends PureComponent {
       id: 0,
     },
     {
-      p1: [1250, 750],
+      p1: [-1, -1],
       p2: [1250, 250],
       p3: [1750, 250],
       p4: [1750, 750],
@@ -31,31 +32,15 @@ class App extends PureComponent {
     }
     ],
     current_curve_id: 0, //id is their position in the array
-    maxCurves: 5,
-    p1: [250, 750],
-    p2: [250, 250],
-    p3: [750, 250],
-    p4: [750, 750],
+    maxCurves: 20,
     point_of_reference: [500, 500],
     t: 0,
     dependent: true,
   };
-  // constructor(props) {
-  //   super(props);
-  //   this.state.curves.push({
-  //     p1: this.state.curves[0]['p4'],
-  //     p2: [1250, 250],
-  //     p3: [1750, 250],
-  //     p4: [1750, 750],
-  //     id: 2,
-  //   })
-  // }
 
   transformScalePoints = (points) => {
     let minX = points[0][0];
     let minY = points[0][1];
-    let maxX = points[0][0];
-    let maxY = points[0][1];
     let retPoints = []
 
     // transform points to 0,0
@@ -70,6 +55,8 @@ class App extends PureComponent {
     }
     minX = 0;
     minY = 0;
+    let maxX = retPoints[0][0];
+    let maxY = retPoints[0][1];
 
     // scaling x and y to be under 1000 by 1000.
     // TODO: change 1000 to a constant
@@ -107,20 +94,10 @@ class App extends PureComponent {
   }
 
   handleSelectCurve = curveId => () => {
-    console.log(curveId);
     this.setState({ current_curve_id: curveId });
   };
 
   handleUpdatePoint = (pointId, pointCoords) => {
-    // HACK: Quadratic curves take P1, P2, and P4 (not P3).
-    // This is to make transitioning between the two feel more natural.
-    // Sadly, this means we have to patch that association when the quadratic
-    // p4 moves.
-    if (this.state.type === 'quadratic' && pointId === 'p3') {
-      pointId = 'p4';
-    }
-
-    // this.setState({ [pointId]: pointCoords });
     let curveID = this.state.current_curve_id;
     if (curveID !== 0 && pointId === 'p1') {
       curveID -= 1;
@@ -146,6 +123,36 @@ class App extends PureComponent {
     retPoint[0] += p4[0] * (3*(t**2));
     retPoint[1] += p4[1] * (3*(t**2));
     return retPoint;
+  }
+
+  addCurve = () => {
+    if (this.state.curves.length < this.state.maxCurves) {
+      this.setState(prevState => {
+        let curves = JSON.parse(JSON.stringify(prevState.curves));
+        const secondLastPoint = curves[curves.length-1]['p3'];
+        const endPoint = curves[curves.length-1]['p4'];
+        // TODO: change to constants
+        const newCurve = (endPoint[0] < 1000 || (endPoint[0] < 3000 && endPoint[0] > secondLastPoint[0])) ? {
+          p1: [-1, -1],
+          p2: [endPoint[0] + 300, endPoint[1]],
+          p3: [endPoint[0] + 600, endPoint[1]],
+          p4: [endPoint[0] + 900, endPoint[1]],
+          id: prevState.curves.length,
+        } : {
+          p1: [-1, -1],
+          p2: [endPoint[0] - 300, endPoint[1]],
+          p3: [endPoint[0] - 600, endPoint[1]],
+          p4: [endPoint[0] - 900, endPoint[1]],
+          id: prevState.curves.length,
+        }
+        curves.push(newCurve);
+        return {
+          curves: curves,
+        }
+      })
+    } else {
+      alert("Cannot add more curves than " + this.state.maxCurves);
+    }
   }
   
   render() {
@@ -176,8 +183,13 @@ class App extends PureComponent {
       <div className="App">
         {/* TODO: fix header display */}
         <div className="header">
-        <div className='slider-wrapper'>
+          <div className='slider-wrapper'>
             <Slider value={t} changeValue={ (newVal) => { this.setState({t: newVal}); } }/>
+            <div>
+              <Button performFunction={this.addCurve}
+                text={'Add a curve'}
+              />
+            </div>
           </div>
           <div className="title">Points:&nbsp;</div>
           <div className='hideable'>
