@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 
 import Slider from './components/slider';
 import Button from './components/button';
+// import Button from '@mui/material/Button';
 
 import './App.css';
 // import { p1weight, p2weight, p3weight, p4weight } from './constants/constants';
@@ -60,18 +61,22 @@ class App extends PureComponent {
 
     // scaling x and y to be under 1000 by 1000.
     // TODO: change 1000 to a constant
+    //    find maxX
     for (let i = 0; i < retPoints.length; i++) {
       maxX = Math.max(maxX, retPoints[i][0]);
     }
+    //    if maxX > 1000 => 1000/maxX < 1.
     if (1000/maxX < 1) {
       for (let i = 0; i < retPoints.length; i++) {
         retPoints[i][0] *= 1000/maxX;
         retPoints[i][1] *= 1000/maxX;
       }
     }
+    //    find maxY
     for (let i = 0; i < retPoints.length; i++) {
       maxY = Math.max(maxY, retPoints[i][1]);
     }
+    //    if maxY > 1000 => 1000/maxY < 1.
     if (1000/maxY < 1) {
       for (let i = 0; i < retPoints.length; i++) {
         retPoints[i][0] *= 1000/maxY;
@@ -159,9 +164,10 @@ class App extends PureComponent {
     const { point_of_reference, t, curves, current_curve_id, } = this.state;
     const p1 = (current_curve_id === 0) ? curves[current_curve_id]['p1'] : curves[current_curve_id-1]['p4']
     const { p2, p3, p4, } = curves[current_curve_id];
-    const d_p1 = [(-3*p1[0]+3*p2[0])/6, (-3*p1[1]+3*p2[1])/6];
-    const d_p2 = [(-3*p2[0]+3*p3[0])/6, (-3*p2[1]+3*p3[1])/6];
-    const d_p3 = [(-3*p3[0]+3*p4[0])/6, (-3*p3[1]+3*p4[1])/6];
+    const derivativeScaling = 6;
+    const d_p1 = [(-3*p1[0]+3*p2[0])/derivativeScaling, (-3*p1[1]+3*p2[1])/derivativeScaling];
+    const d_p2 = [(-3*p2[0]+3*p3[0])/derivativeScaling, (-3*p2[1]+3*p3[1])/derivativeScaling];
+    const d_p3 = [(-3*p3[0]+3*p4[0])/derivativeScaling, (-3*p3[1]+3*p4[1])/derivativeScaling];
     // console.log(d_p1, d_p2, d_p3);
 
     let [sp1, sp2, sp3, sp4] = this.transformScalePoints([p1, p2, p3, p4]);
@@ -176,7 +182,7 @@ class App extends PureComponent {
     const P = lerp(D, E, t);
 
     const deriv_point = this.derivP(p1, p2, p3, p4, t);
-    const display_deriv_p = [P[0]+(deriv_point[0]/6), P[1]+(deriv_point[1]/6)];
+    const display_deriv_p = [P[0]+(deriv_point[0]/derivativeScaling), P[1]+(deriv_point[1]/derivativeScaling)];
     let [sp1_d, sp2_d, sp3_d, sp4_d, sderiv_p] = this.transformScalePoints([p1, p2, p3, p4, display_deriv_p]);
     // console.log(sp1_d, sp2_d, sp3_d, sp4_d, sderiv_p);
     return (
@@ -191,24 +197,25 @@ class App extends PureComponent {
               />
             </div>
           </div>
-          <div className="title">Points:&nbsp;</div>
-          <div className='hideable'>
+          <div>Points:&nbsp;</div>
+          <div>
             <div>p1:&nbsp;({p1[0].toFixed(2)},{p1[1].toFixed(2)})&nbsp;</div>
             <div>p2:&nbsp;({p2[0].toFixed(2)},{p2[1].toFixed(2)})&nbsp;</div>
           </div>
-          <div className='hideable'>
+          <div>
             <div>p3:&nbsp;({p3[0].toFixed(2)},{p3[1].toFixed(2)})&nbsp;</div>
             <div>p4:&nbsp;({p4[0].toFixed(2)},{p4[1].toFixed(2)})&nbsp;</div>
           </div>
-          <div className='hideable'>
+          {/* change derive curve points to be no longer p/6 */}
+          <div>
             <div>derivative curve p1:</div>
             <div>&nbsp;({d_p1[0].toFixed(2)},{d_p1[1].toFixed(2)})&nbsp;</div>
           </div>
-          <div className='hideable'>
+          <div>
             <div>derivative curve p2:</div>
             <div>&nbsp;({d_p2[0].toFixed(2)},{d_p2[1].toFixed(2)})&nbsp;</div>
           </div>
-          <div className='hideable'>
+          <div>
             <div>derivative curve p3:</div>
             <div>&nbsp;({d_p3[0].toFixed(2)},{d_p3[1].toFixed(2)})&nbsp;</div>
           </div>
@@ -224,6 +231,7 @@ class App extends PureComponent {
                 points={[p1, p2, p3, p4]}
                 curves={curves}
                 handleSelectCurve={this.handleSelectCurve}
+                selectedCurve={current_curve_id}
                 updatePoint={this.handleUpdatePoint}
                 t={t}
               />}
@@ -256,7 +264,9 @@ class App extends PureComponent {
               />
             </div>
             <div className="grid-item">
-              <BernsteinWeightGraph t={t} />
+              <BezierController 
+                bezierComponent={<BernsteinWeightGraph t={t}/>}
+              />
             </div>
             <div className="grid-item">
               <BezierController bezierComponent={

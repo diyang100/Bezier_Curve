@@ -1,16 +1,31 @@
 import React from 'react';
+import styled from 'styled-components';
+import { COLORS, scaleColor } from '../constants/constants';
 
-import './bezier.css';
+// import './bezier.css';
 
-
-const BezierController = ({ bezierComponent }) => {
+export default function BezierController({ bezierComponent }) {
   return (
-    <div className="wrapper">
-      <div className="bezier-wrapper">
+    <BezierWrapper>
+      <SVGWrapper>
         {bezierComponent}
-      </div>
-    </div>
+      </SVGWrapper>
+    </BezierWrapper>
   )
 }
 
-export default BezierController;
+const SVGWrapper = styled.div`
+  background: ${COLORS.palette.black};
+`
+
+const BezierWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  background: ${scaleColor(0.05, COLORS.palette.black)};
+  box-sizing: border-box;
+  padding: 10px;
+  &:hover {
+    background: ${scaleColor(0.1, COLORS.palette.black)};
+    transition-duration: 0.3s;
+  }
+`

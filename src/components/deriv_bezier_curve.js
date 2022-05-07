@@ -24,7 +24,7 @@ class DerivBezier extends PureComponent {
   static defaultProps = {
     viewBoxWidth: 100,
     viewBoxHeight: 100,
-    strokeColor: COLORS.violet[500],
+    strokeColor: COLORS.palette.cyan,
     strokeWidth: 6,
     grabbable: false,
   };
@@ -81,36 +81,66 @@ class DerivBezier extends PureComponent {
         <Svg viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} ref={node => (this.node = node)}>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+                stroke={COLORS.palette.orange} fill={COLORS.palette.orange}
                 markerWidth="6" markerHeight="6"
                 orient="auto-start-reverse">
               <path d="M 0 1 L 5 5 L 0 9 z" />
             </marker>
           </defs>
-        <ControlLine x1={p1[0] + offset[0]} y1={p1[1] + offset[1]} x2={p2[0] + offset[0]} y2={p2[1] + offset[1]} />
-        <ControlLine x1={p3[0] + offset[0]} y1={p3[1] + offset[1]} x2={p4[0] + offset[0]} y2={p4[1] + offset[1]} />
-        <ControlLine x1={p2[0] + offset[0]} y1={p2[1] + offset[1]} x2={p3[0] + offset[0]} y2={p3[1] + offset[1]} />
+        <ControlLine x1={p1[0] + offset[0]} y1={p1[1] + offset[1]} x2={p2[0] + offset[0]} y2={p2[1] + offset[1]} stroke={COLORS.gray[300]}/>
+        <ControlLine x1={p3[0] + offset[0]} y1={p3[1] + offset[1]} x2={p4[0] + offset[0]} y2={p4[1] + offset[1]} stroke={COLORS.gray[300]}/>
+        <ControlLine x1={p2[0] + offset[0]} y1={p2[1] + offset[1]} x2={p3[0] + offset[0]} y2={p3[1] + offset[1]} stroke={COLORS.gray[300]}/>
 
         <path d={instructions} fill="none" stroke={strokeColor} strokeWidth={strokeWidth} />
 
-        <EndPoint cx={p1[0] + offset[0]} cy={p1[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
-        <EndPoint cx={p2[0] + offset[1]} cy={p2[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
-        <EndPoint cx={p3[0] + offset[0]} cy={p3[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
-        <EndPoint cx={p4[0] + offset[0]} cy={p4[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
+        <EndPoint stroke={COLORS.palette.cyan} cx={p1[0] + offset[0]} cy={p1[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
+        <EndPoint stroke={COLORS.palette.cyan} cx={p2[0] + offset[1]} cy={p2[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
+        <EndPoint stroke={COLORS.palette.cyan} cx={p3[0] + offset[0]} cy={p3[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
+        <EndPoint stroke={COLORS.palette.cyan} cx={p4[0] + offset[0]} cy={p4[1] + offset[1]} grabbable={grabbable} isMobile={isMobile} />
         {/* <ControlPoint cx={display_deriv_p[0] + offset[0]} cy={display_deriv_p[1] + offset[1]} grabbable={false} isMobile={isMobile} /> */}
         <VectorLine x1={P[0] + offset[0]} y1={P[1] + offset[1]} 
           x2={display_deriv_p[0] + offset[0]} y2={display_deriv_p[1] + offset[1]} 
           style={{ markerEnd:"url(#arrow)" }}
+          stroke={COLORS.palette.orange}
+        />
+        <EndPoint
+          cx={P[0] + offset[0]} cy={P[1] + offset[1]}
+          grabbable={false}
+          isMobile={isMobile}
+          stroke={COLORS.palette.orange}
         />
       </Svg>
     );
   }
 }
 
-const ControlPoint = ({ cx, cy, onMouseDown, onTouchStart, grabbable, isMobile }) => (
+const ControlPoint = ({
+  cx,
+  cy,
+  onMouseDown,
+  onTouchStart,
+  grabbable,
+  isMobile,
+  fill,
+  stroke,
+}) => (
   <g>
-    <VisibleControlPoint cx={cx} cy={cy} grabbable={grabbable} isMobile={isMobile}/>
-    <InvisibleHandle cx={cx} cy={cy} grabbable={grabbable} 
-        onMouseDown={onMouseDown} onTouchStart={onTouchStart} isMobile={isMobile} />
+    <VisibleControlPoint
+      cx={cx}
+      cy={cy}
+      grabbable={grabbable}
+      isMobile={isMobile}
+      fill={fill}
+      stroke={stroke}
+    />
+    <InvisibleHandle
+      cx={cx}
+      cy={cy}
+      grabbable={grabbable}
+      onMouseDown={onMouseDown}
+      onTouchStart={onTouchStart}
+      isMobile={isMobile}
+    />
   </g>
 );
 
@@ -128,19 +158,21 @@ const Point = styled.ellipse`
 `;
 
 const EndPoint = styled(Point).attrs(props => ({
-  rx: props.isMobile ? 40 : 15,
-  ry: props.isMobile ? 40 : 15,
+  rx: props.isMobile ? 30 : 15,
+  ry: props.isMobile ? 30 : 15,
+  strokeWidth: props.isMobile ? 10 : 5,
 }))`
-  fill: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
+  fill: ${props => props.fill};
+  stroke: ${props => props.stroke};
 `;
 
 const VisibleControlPoint = styled(Point).attrs(props => ({
-  rx: props.isMobile ? 20 : 8,
-  ry: props.isMobile ? 20 : 8,
+  rx: props.isMobile ? 23 : 12,
+  ry: props.isMobile ? 23 : 12,
+  strokeWidth: props.isMobile ? 10 : 5,
 }))`
-  fill: white;
-  stroke: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
-  stroke-width: 3;
+  fill: ${props => props.fill || COLORS.palette.black};
+  stroke: ${props => props.stroke || COLORS.gray[300]};
 `;
 
 const InvisibleHandle = styled(Point).attrs(props => ({
@@ -152,13 +184,12 @@ const InvisibleHandle = styled(Point).attrs(props => ({
 `;
 
 const ControlLine = styled.line`
-  stroke: ${COLORS.gray[300]};
-  stroke-dasharray: 5, 5;
-  stroke-width: 2;
+  stroke: ${props => props.stroke || COLORS.gray[500]};
+  stroke-width: 3;
 `;
 
 const VectorLine = styled.line`
-  stroke: ${COLORS.black};
+  stroke: ${props => props.stroke || COLORS.gray[500]};
   stroke-width: 6;
 `;
 

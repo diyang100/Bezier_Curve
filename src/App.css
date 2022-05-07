@@ -1,16 +1,6 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  background: black;
 }
 
 /* .header-sections {
@@ -26,10 +16,11 @@
 }
 
 .grid-container {
-  height: 300px;
+  height: auto;
   display: grid;
   place-items: center;
   gap: 10px;
+  padding-bottom: 20px;
 }
 
 .grid-item {
@@ -134,7 +125,7 @@
   }
   
   .header-padding {
-    padding: 60px;
+    padding: 80px;
   }
 
   .header > div {
@@ -163,7 +154,7 @@
   }
   
   .header-padding {
-    padding: 60px;
+    padding: 80px;
   }
   
   .grid-container {

@@ -26,13 +26,13 @@ class BernsteinBezier extends PureComponent {
   static defaultProps = {
     viewBoxWidth: 100,
     viewBoxHeight: 100,
-    strokeColor: COLORS.black,
+    strokeColor: COLORS.white,
     strokeWidth: 6,
     grabbable: true,
   };
 
-  lerp = (p1, p2, t) => {
-      return [(1-t)*p1[0] + t*p2[0], (1-t)*p1[1] + t*p2[1]];
+  pointDist = (x1, y1, x2, y2) => {
+    return Math.sqrt(((y2 - y1) ** 2) + ((x2 - x1) ** 2));
   }
 
   render() {
@@ -49,6 +49,9 @@ class BernsteinBezier extends PureComponent {
     const [p1, p2, p3, p4, point_of_reference] = points;
 
     const curveType = typeof p4 !== 'undefined' ? 'cubic' : 'quadratic';
+
+    // TODO: save as constant
+    const hideMarkerThreshold = 25; // unit is px
 
     // TODO: change 1000 constant to variable passed
     p1[1] = 1000 - p1[1];
@@ -95,22 +98,22 @@ class BernsteinBezier extends PureComponent {
       >
         <defs>
           <marker id="arrow1" viewBox="0 0 10 10" refX="5" refY="5"
-              markerWidth="6" markerHeight="6" stroke={"#ff0000"} fill={"#ff0000"}
+              markerWidth="6" markerHeight="6" stroke={COLORS.palette.red} fill={COLORS.palette.red}
               orient="auto-start-reverse">
             <path d="M 0 1 L 5 5 L 0 9 z" />
           </marker>
           <marker id="arrow2" viewBox="0 0 10 10" refX="5" refY="5"
-              markerWidth="6" markerHeight="6" stroke={"#ffff00"} fill={"#ffff00"}
+              markerWidth="6" markerHeight="6" stroke={COLORS.palette.yellow} fill={COLORS.palette.yellow}
               orient="auto-start-reverse">
             <path d="M 0 1 L 5 5 L 0 9 z"  />
           </marker>
           <marker id="arrow3" viewBox="0 0 10 10" refX="5" refY="5"
-              markerWidth="6" markerHeight="6" stroke={"#00ff00"} fill={"#00ff00"}
+              markerWidth="6" markerHeight="6" stroke={COLORS.palette.green} fill={COLORS.palette.green}
               orient="auto-start-reverse">
             <path d="M 0 1 L 5 5 L 0 9 z" />
           </marker>
           <marker id="arrow4" viewBox="0 0 10 10" refX="5" refY="5"
-              markerWidth="6" markerHeight="6" stroke={"#00ccff"} fill={"#00ccff"}
+              markerWidth="6" markerHeight="6" stroke={COLORS.palette.blue} fill={COLORS.palette.blue}
               orient="auto-start-reverse">
             <path d="M 0 1 L 5 5 L 0 9 z" />
           </marker>
@@ -131,6 +134,7 @@ class BernsteinBezier extends PureComponent {
           cy={p1[1]}
           grabbable={false}
           isMobile={isMobile}
+          stroke={COLORS.palette.red}
         />
 
         <EndPoint
@@ -138,6 +142,7 @@ class BernsteinBezier extends PureComponent {
           cy={p2[1]}
           grabbable={false}
           isMobile={isMobile}
+          stroke={COLORS.palette.yellow}
         />
 
         <EndPoint
@@ -145,6 +150,7 @@ class BernsteinBezier extends PureComponent {
           cy={p3[1]}
           grabbable={false}
           isMobile={isMobile}
+          stroke={COLORS.palette.green}
         />
 
         <EndPoint
@@ -152,6 +158,7 @@ class BernsteinBezier extends PureComponent {
           cy={p4[1]}
           grabbable={false}
           isMobile={isMobile}
+          stroke={COLORS.palette.blue}
         />
 
         {/* <ControlPoint cx={w1point[0]} cy={w1point[1]} grabbable={false} isMobile={isMobile}/>
@@ -161,16 +168,32 @@ class BernsteinBezier extends PureComponent {
         {/* TODO: hide arrows when line length is less than a threshold */}
         {
             (dependent) ? <>
-                <ControlLineP1 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w1point[0]} y2={w1point[1]} style={{ markerEnd:"url(#arrow1)" }} />
-                <ControlLineP2 x1={w1point[0]} y1={w1point[1]} x2={w2point[0]} y2={w2point[1]} style={{ markerEnd:"url(#arrow2)" }} />
-                <ControlLineP3 x1={w2point[0]} y1={w2point[1]} x2={w3point[0]} y2={w3point[1]} style={{ markerEnd:"url(#arrow3)" }} />
-                <ControlLineP4 x1={w3point[0]} y1={w3point[1]} x2={w4point[0]} y2={w4point[1]} style={{ markerEnd:"url(#arrow4)" }} />
+                <ControlLineP1 x1={point_of_reference[0]} y1={point_of_reference[1]} 
+                  x2={w1point[0]} y2={w1point[1]} 
+                  style={(this.pointDist(point_of_reference[0], point_of_reference[1], w1point[0], w1point[1]) > hideMarkerThreshold) ? { markerEnd:"url(#arrow1)" } : {}} />
+                <ControlLineP2 x1={w1point[0]} y1={w1point[1]} 
+                  x2={w2point[0]} y2={w2point[1]} 
+                  style={(this.pointDist(w1point[0], w1point[1], w2point[0], w2point[1]) > hideMarkerThreshold) ? { markerEnd:"url(#arrow2)" } : {}} />
+                <ControlLineP3 x1={w2point[0]} y1={w2point[1]} 
+                  x2={w3point[0]} y2={w3point[1]} 
+                  style={(this.pointDist(w2point[0], w2point[1], w3point[0], w3point[1]) > hideMarkerThreshold) ? { markerEnd:"url(#arrow3)" } : {}} />
+                <ControlLineP4 x1={w3point[0]} y1={w3point[1]} 
+                  x2={w4point[0]} y2={w4point[1]} 
+                  style={(this.pointDist(w3point[0], w3point[1], w4point[0], w4point[1]) > hideMarkerThreshold) ? { markerEnd:"url(#arrow4)" } : {}} />
             </>
             : <>
-                <ControlLineP1 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w1point[0]} y2={w1point[1]} style={{ markerEnd:"url(#arrow1)" }} />
-                <ControlLineP2 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w2point[0]} y2={w2point[1]} style={{ markerEnd:"url(#arrow2)" }} />
-                <ControlLineP3 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w3point[0]} y2={w3point[1]} style={{ markerEnd:"url(#arrow3)" }} />
-                <ControlLineP4 x1={point_of_reference[0]} y1={point_of_reference[1]} x2={w4point[0]} y2={w4point[1]} style={{ markerEnd:"url(#arrow4)" }} />
+                <ControlLineP1 x1={point_of_reference[0]} y1={point_of_reference[1]} 
+                  x2={w1point[0]} y2={w1point[1]} 
+                  style={{ markerEnd:"url(#arrow1)" }} />
+                <ControlLineP2 x1={point_of_reference[0]} y1={point_of_reference[1]} 
+                  x2={w2point[0]} y2={w2point[1]} 
+                  style={{ markerEnd:"url(#arrow2)" }} />
+                <ControlLineP3 x1={point_of_reference[0]} y1={point_of_reference[1]} 
+                  x2={w3point[0]} y2={w3point[1]} 
+                  style={{ markerEnd:"url(#arrow3)" }} />
+                <ControlLineP4 x1={point_of_reference[0]} y1={point_of_reference[1]} 
+                  x2={w4point[0]} y2={w4point[1]} 
+                  style={{ markerEnd:"url(#arrow4)" }} />
             </>
         }
         
@@ -179,6 +202,7 @@ class BernsteinBezier extends PureComponent {
           cy={point_of_reference[1]}
           grabbable={false}
           isMobile={isMobile}
+          stroke={COLORS.white}
         />
         
       </Svg>
@@ -193,6 +217,8 @@ const ControlPoint = ({
   onTouchStart,
   grabbable,
   isMobile,
+  fill,
+  stroke,
 }) => (
   <g>
     <VisibleControlPoint
@@ -200,6 +226,8 @@ const ControlPoint = ({
       cy={cy}
       grabbable={grabbable}
       isMobile={isMobile}
+      fill={fill}
+      stroke={stroke}
     />
     <InvisibleHandle
       cx={cx}
@@ -226,19 +254,21 @@ const Point = styled.ellipse`
 `;
 
 const EndPoint = styled(Point).attrs(props => ({
-  rx: props.isMobile ? 40 : 15,
-  ry: props.isMobile ? 40 : 15,
+  rx: props.isMobile ? 30 : 15,
+  ry: props.isMobile ? 30 : 15,
+  strokeWidth: props.isMobile ? 10 : 5,
 }))`
-  fill: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
+  fill: ${props => props.fill};
+  stroke: ${props => props.stroke};
 `;
 
 const VisibleControlPoint = styled(Point).attrs(props => ({
-  rx: props.isMobile ? 20 : 8,
-  ry: props.isMobile ? 20 : 8,
+  rx: props.isMobile ? 23 : 12,
+  ry: props.isMobile ? 23 : 12,
+  strokeWidth: props.isMobile ? 10 : 5,
 }))`
-  fill: white;
-  stroke: ${props => (props.grabbable ? COLORS.pink[500] : COLORS.violet[500])};
-  stroke-width: 3;
+  fill: ${props => props.fill || COLORS.palette.black};
+  stroke: ${props => props.stroke || COLORS.gray[300]};
 `;
 
 const InvisibleHandle = styled(Point).attrs(props => ({
@@ -250,9 +280,8 @@ const InvisibleHandle = styled(Point).attrs(props => ({
 `;
 
 const ControlLine = styled.line`
-  stroke: ${COLORS.gray[300]};
-  stroke-dasharray: 5, 5;
-  stroke-width: 2;
+  stroke: ${props => props.stroke || COLORS.gray[500]};
+  stroke-width: 3;
 `;
 
 // TODO: fix colours to constant file
